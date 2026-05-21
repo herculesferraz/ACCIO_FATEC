@@ -6,14 +6,20 @@ if (estaLogado()) {
     exit;
 }
 
-$erro = '';
+$erro   = '';
 $sucesso = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome  = trim($_POST['nome'] ?? '');
+    $nome  = trim($_POST['nome']  ?? '');
     $email = trim($_POST['email'] ?? '');
-    $senha = $_POST['senha'] ?? '';
-    $conf  = $_POST['confirmar_senha'] ?? '';
+    $senha = $_POST['senha']            ?? '';
+    $conf  = $_POST['confirmar_senha']  ?? '';
+    $tipo  = $_POST['tipo']             ?? 'aluno';
+
+    // Validação do tipo (nunca confiar no cliente)
+    if (!in_array($tipo, ['aluno', 'bibliotecario'])) {
+        $tipo = 'aluno';
+    }
 
     if (empty($nome) || empty($email) || empty($senha)) {
         $erro = 'Preencha todos os campos.';
@@ -24,16 +30,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($senha !== $conf) {
         $erro = 'As senhas não coincidem.';
     } else {
-        $pdo = getConexao();
-        $stmt = $pdo->prepare("SELECT id FROM usuarios WHERE email = ?");
-        $stmt->execute([$email]);
-        if ($stmt->fetch()) {
+        $pdo  = getConexao();
+        $chk  = $pdo->prepare("SELECT id FROM usuarios WHERE email = ?");
+        $chk->execute([$email]);
+        if ($chk->fetch()) {
             $erro = 'Este email já está cadastrado.';
         } else {
             $hash = password_hash($senha, PASSWORD_DEFAULT);
-            $stmt = $pdo->prepare("INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)");
-            $stmt->execute([$nome, $email, $hash]);
-            $sucesso = 'Conta criada! Você pode fazer login agora.';
+            $ins  = $pdo->prepare("INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)");
+            $ins->execute([$nome, $email, $hash, $tipo]);
+            $sucesso = 'Conta criada com sucesso! Você já pode fazer login.';
         }
     }
 }
@@ -43,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACCIOTEK</title>
+    <title>ACCIOTEK — Criar Conta</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 </head>
@@ -81,7 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="nome">Nome completo</label>
                     <div class="field-wrapper">
                         <span class="field-icon">👤</span>
-                        <input type="text" id="nome" name="nome" placeholder="Seu nome" required value="<?= h($_POST['nome'] ?? '') ?>">
+                        <input type="text" id="nome" name="nome"
+                               placeholder="Seu nome" required
+                               value="<?= h($_POST['nome'] ?? '') ?>">
                     </div>
                 </div>
 
@@ -89,7 +97,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="email">Email</label>
                     <div class="field-wrapper">
                         <span class="field-icon">✉</span>
-                        <input type="email" id="email" name="email" placeholder="seu@email.edu" required value="<?= h($_POST['email'] ?? '') ?>">
+                        <input type="email" id="email" name="email"
+                               placeholder="seu@email.edu" required
+                               value="<?= h($_POST['email'] ?? '') ?>">
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label for="tipo">Tipo de conta</label>
+                    <div class="field-wrapper">
+                        <span class="field-icon">🏷</span>
+                        <select id="tipo" name="tipo" style="width:100%;padding:.6rem 1rem .6rem 2.5rem;border:none;background:transparent;color:inherit;font-size:1rem">
+                            <option value="aluno"         <?= ($_POST['tipo'] ?? '') === 'aluno'         ? 'selected' : '' ?>>Aluno</option>
+                            <option value="bibliotecario" <?= ($_POST['tipo'] ?? '') === 'bibliotecario' ? 'selected' : '' ?>>Bibliotecário</option>
+                        </select>
                     </div>
                 </div>
 
@@ -97,7 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="senha">Senha</label>
                     <div class="field-wrapper">
                         <span class="field-icon">🔑</span>
-                        <input type="password" id="senha" name="senha" placeholder="Mínimo 6 caracteres" required>
+                        <input type="password" id="senha" name="senha"
+                               placeholder="Mínimo 6 caracteres" required>
                     </div>
                 </div>
 
@@ -105,7 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="confirmar_senha">Confirmar Senha</label>
                     <div class="field-wrapper">
                         <span class="field-icon">🔒</span>
-                        <input type="password" id="confirmar_senha" name="confirmar_senha" placeholder="Repita a senha" required>
+                        <input type="password" id="confirmar_senha" name="confirmar_senha"
+                               placeholder="Repita a senha" required>
                     </div>
                 </div>
 

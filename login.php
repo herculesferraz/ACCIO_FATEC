@@ -15,14 +15,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($email) || empty($senha)) {
         $erro = 'Preencha todos os campos.';
     } else {
-        $pdo = getConexao();
-        $stmt = $pdo->prepare("SELECT id, nome, senha FROM usuarios WHERE email = ?");
+        $pdo  = getConexao();
+        $stmt = $pdo->prepare("SELECT id, nome, senha, tipo FROM usuarios WHERE email = ?");
         $stmt->execute([$email]);
         $usuario = $stmt->fetch();
 
         if ($usuario && password_verify($senha, $usuario['senha'])) {
-            $_SESSION['usuario_id'] = $usuario['id'];
+            $_SESSION['usuario_id']   = $usuario['id'];
             $_SESSION['usuario_nome'] = $usuario['nome'];
+            $_SESSION['usuario_tipo'] = $usuario['tipo']; // 'aluno' ou 'bibliotecario'
             header('Location: index.php');
             exit;
         } else {
@@ -36,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACCIOTEK - Entrar</title>
+    <title>ACCIOTEK — Entrar</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -49,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="book-ornament top"></div>
                 <div class="book-title-area">
                     <div class="book-emblem"></div>
-                    <h1 class="book-name">ACCIOTECK<br></h1>
-                    <p class="book-subtitle">BIBLIOTECA PUBLICA</p>
+                    <h1 class="book-name">ACCIOTEK<br></h1>
+                    <p class="book-subtitle">BIBLIOTECA UNIVERSITÁRIA</p>
                 </div>
                 <div class="book-ornament bottom"></div>
             </div>
@@ -72,7 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="email">Email</label>
                     <div class="field-wrapper">
                         <span class="field-icon">✉</span>
-                        <input type="email" id="email" name="email" placeholder="seu@email.edu" required value="<?= h($_POST['email'] ?? '') ?>">
+                        <input type="email" id="email" name="email"
+                               placeholder="seu@email.edu" required
+                               value="<?= h($_POST['email'] ?? '') ?>">
                     </div>
                 </div>
 
@@ -80,7 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="senha">Senha</label>
                     <div class="field-wrapper">
                         <span class="field-icon"><i class="bi bi-key"></i></span>
-                        <input type="password" id="senha" name="senha" placeholder="••••••••" required>
+                        <input type="password" id="senha" name="senha"
+                               placeholder="••••••••" required>
                     </div>
                 </div>
 
