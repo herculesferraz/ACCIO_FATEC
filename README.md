@@ -1,4 +1,4 @@
-# 📚 Biblioteca Universitária — Sistema Web Completo
+# 📚 ACCIOTEKA — Sistema Web Completo
 
 Sistema de gerenciamento de biblioteca universitária com tema de livro antigo/mágico.
 
@@ -38,10 +38,11 @@ http://localhost/biblioteca/
 ```
 
 **5. Login padrão**
-```
-Email: admin@biblioteca.edu
-Senha: password   (hash: $2y$10$92IXUNpkjO0rOQ5byMi.Ye)
-```
+
+| Email | admin@biblioteca.edu |
+| Senha | password |
+| hash | $2y$10$92IXUNpkjO0rOQ5byMi.Ye |
+
 
 > **Nota:** Após o primeiro acesso, crie sua própria conta em Cadastro.
 
