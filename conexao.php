@@ -3,10 +3,10 @@
 // CONEXÃO COM BANCO DE DADOS - PDO
 // ============================================================
 
-define('DB_HOST', 'localhost');
+define('DB_HOST', 'lmariadb.glautec.tec.br');
 define('DB_NAME', 'biblioteca_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_USER', 'hercules');
+define('DB_PASS', 'fm>07TkFdq');
 define('DB_CHARSET', 'utf8mb4');
 
 function getConexao() {
