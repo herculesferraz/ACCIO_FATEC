@@ -115,14 +115,6 @@ $empAtivo = $emp->fetch();
                     </div>
                 <?php endif; ?>
             </div>
-            <section class="pdf-area">
-                <h2>Visualizar PDF</h2>
-                <a href="https://www.dominiopublico.gov.br/download/texto/eb00002a.pdf"
-                    target="_blank"
-                    class="btn-pdf">
-                    Ler PDF
-                </a>
-            </section>
         </div>
     </div>
 
