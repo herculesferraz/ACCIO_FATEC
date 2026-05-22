@@ -155,7 +155,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'sortear') {
             `;
             document.getElementById('resultActions').innerHTML = `
                 <a href="detalhes.php?id=${livro.id}" class="btn-primary">📖 Ver Detalhes</a>
-                ${livro.quantidade > 0 ? `<a href="emprestimos.php?action=novo&livro=${livro.id}" class="btn-secondary">📤 Emprestar</a>` : ''}
+                ${livro.quantidade > 0 ? `<a href="emprestimos.php?action=solicitar&livro=${livro.id}" class="btn-secondary">📤 Emprestar</a>` : ''}
             `;
 
             result.style.display = 'block';

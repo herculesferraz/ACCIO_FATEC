@@ -76,7 +76,7 @@ if ($action === 'cancelar' && isset($_GET['id'])) {
 
 // ═══════════════════════════════════════════════════════════
 // BIBLIOTECÁRIO: Converter reserva em empréstimo (pendente)
--- quando houver devoluções e exemplar ficar disponível
+//    Usado quando há devolução e exemplar fica disponível
 // ═══════════════════════════════════════════════════════════
 if ($action === 'converter' && isset($_GET['id']) && ehBibliotecario()) {
     $rid = (int)$_GET['id'];

@@ -64,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p>Entre para acessar seu acervo</p>
             </div>
 
+            <?= exibirFlash() ?>
             <?php if ($erro): ?>
                 <div class="alert alert-erro"><?= h($erro) ?></div>
             <?php endif; ?>
