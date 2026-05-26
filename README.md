@@ -1,47 +1,25 @@
 # 📚 ACCIOTEKA — Sistema Web Completo
 
-Sistema de gerenciamento de biblioteca universitária com tema de livro antigo/mágico.
+**3. Configurar conexão**
 
----
-
-## 🚀 Instalação no XAMPP
-
-### Pré-requisitos
-- XAMPP instalado (PHP 7.4+ | MySQL 5.7+)
-- Extensão PDO ativa (padrão no XAMPP)
-
-### Passo a Passo
-
-**1. Copie os arquivos**
-```
-C:\xampp\htdocs\biblioteca\
-```
-
-**2. Crie o banco de dados**
-- Abra o navegador: `http://localhost/phpmyadmin`
-- Clique em "Importar"
-- Selecione o arquivo: `sql/biblioteca_db.sql`
-- Clique em "Executar"
-
-**3. Configurar conexão** (se necessário)
-Edite `conexao.php`:
 ```php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'biblioteca_db');
-define('DB_USER', 'root');
-define('DB_PASS', '');  // senha padrão XAMPP = vazia
+define('DB_HOST', '');
+define('DB_NAME', '');
+define('DB_USER', '');
+define('DB_PASS', '');
 ```
 
 **4. Acessar o sistema**
 ```
-http://localhost/biblioteca/
+ANALIZAR!!!
 ```
 
-**5. Login padrão**
-```
-Email: admin@biblioteca.edu
-Senha: password   (hash: $2y$10$92IXUNpkjO0rOQ5byMi.Ye)
-```
+**5. Login padrão ADMINISTRADOR/BIBLIOTECARIO**
+
+| Email | Senha |
+|--------|-----------|
+| admin@biblioteca.edu | password |
+---
 
 > **Nota:** Após o primeiro acesso, crie sua própria conta em Cadastro.
 
@@ -74,6 +52,7 @@ Senha: password   (hash: $2y$10$92IXUNpkjO0rOQ5byMi.Ye)
 │
 └── sql/
     └── biblioteca_db.sql ← Schema + dados de exemplo
+
 ```
 
 ---

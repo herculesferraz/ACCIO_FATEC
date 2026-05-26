@@ -88,3 +88,103 @@ INSERT INTO livros (titulo, autor, categoria, sinopse, quantidade, ano_publicaca
 ('Admirável Mundo Novo', 'Aldous Huxley', 'Ficção Científica', 'Em um futuro onde os seres humanos são condicionados desde o nascimento, Bernard Marx questiona os fundamentos dessa sociedade aparentemente perfeita mas profundamente desumana.', 4, 1932, 'https://covers.openlibrary.org/b/id/8575706-L.jpg'),
 ('O Mestre e Margarida', 'Mikhail Bulgákov', 'Realismo Mágico', 'O diabo visita Moscou soviética acompanhado de séquito bizarro, enquanto dois enredos paralelos — um em Moscou e outro na antiga Jerusalém — se entrelaçam magistralmente.', 3, 1967, 'https://covers.openlibrary.org/b/id/8479715-L.jpg'),
 ('Grandes Esperanças', 'Charles Dickens', 'Clássico', 'Pip, um órfão de origem humilde, recebe uma herança misteriosa e vai a Londres tentar se tornar um cavalheiro. Uma exploração da ambição, identidade e redenção.', 3, 1861, 'https://covers.openlibrary.org/b/id/8479715-L.jpg');
+
+-- ============================================================
+-- MIGRAÇÃO ETAPA 2 — ACCIOTEKA
+-- ============================================================
+
+USE biblioteca_db;
+
+-- ─────────────────────────────────────────────────────────────
+-- 1. Coluna 'tipo' em usuarios
+-- ─────────────────────────────────────────────────────────────
+ALTER TABLE usuarios
+    ADD COLUMN IF NOT EXISTS tipo ENUM('aluno','bibliotecario')
+        NOT NULL DEFAULT 'aluno'
+        AFTER email;
+
+-- ─────────────────────────────────────────────────────────────
+-- 2. Promover conta admin padrão a bibliotecário
+-- ─────────────────────────────────────────────────────────────
+UPDATE usuarios
+    SET tipo = 'bibliotecario'
+    WHERE email = 'admin@biblioteca.edu';
+
+-- ─────────────────────────────────────────────────────────────
+-- 3. Ampliar ENUM status em emprestimos
+-- ─────────────────────────────────────────────────────────────
+ALTER TABLE emprestimos
+    MODIFY COLUMN status
+        ENUM('pendente','ativo','devolvido','atrasado','cancelado')
+        NOT NULL DEFAULT 'pendente';
+
+-- ─────────────────────────────────────────────────────────────
+-- 4. Coluna confirmado_por em emprestimos
+-- ─────────────────────────────────────────────────────────────
+ALTER TABLE emprestimos
+    ADD COLUMN IF NOT EXISTS confirmado_por INT NULL DEFAULT NULL
+        AFTER status;
+
+SET @fk_exists = (
+    SELECT COUNT(*)
+    FROM information_schema.TABLE_CONSTRAINTS
+    WHERE CONSTRAINT_SCHEMA = DATABASE()
+      AND TABLE_NAME        = 'emprestimos'
+      AND CONSTRAINT_NAME   = 'fk_confirmado_por'
+      AND CONSTRAINT_TYPE   = 'FOREIGN KEY'
+);
+
+SET @sql_drop = IF(
+    @fk_exists > 0,
+    'ALTER TABLE emprestimos DROP FOREIGN KEY fk_confirmado_por',
+    'SELECT 1 -- noop'
+);
+PREPARE stmt_drop FROM @sql_drop;
+EXECUTE stmt_drop;
+DEALLOCATE PREPARE stmt_drop;
+
+ALTER TABLE emprestimos
+    ADD CONSTRAINT fk_confirmado_por
+        FOREIGN KEY (confirmado_por) REFERENCES usuarios(id)
+        ON DELETE SET NULL;
+
+-- ─────────────────────────────────────────────────────────────
+-- 5. Campo pdf_url em livros
+-- ─────────────────────────────────────────────────────────────
+ALTER TABLE livros
+    ADD COLUMN IF NOT EXISTS pdf_url VARCHAR(512) NULL DEFAULT NULL
+        AFTER capa_url;
+
+-- ─────────────────────────────────────────────────────────────
+-- 6. Tabela de reservas
+-- ─────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS reservas (
+    id           INT  AUTO_INCREMENT PRIMARY KEY,
+    id_usuario   INT  NOT NULL,
+    id_livro     INT  NOT NULL,
+    data_reserva DATE NOT NULL,
+    status       ENUM('ativa','cancelada','convertida') NOT NULL DEFAULT 'ativa',
+    CONSTRAINT fk_res_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id) ON DELETE CASCADE,
+    CONSTRAINT fk_res_livro   FOREIGN KEY (id_livro)   REFERENCES livros(id)   ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+ALTER IGNORE TABLE reservas
+    ADD UNIQUE INDEX uq_reserva_ativa (id_usuario, id_livro, status);
+
+-- ─────────────────────────────────────────────────────────────
+-- 7. Conta bibliotecário padrão (se não existir)
+-- ─────────────────────────────────────────────────────────────
+INSERT IGNORE INTO usuarios (nome, email, senha, tipo)
+VALUES (
+    'Bibliotecário Admin',
+    'biblioteca@acciotek.edu',
+    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    'bibliotecario'
+);
+
+-- ─────────────────────────────────────────────────────────────
+-- Credenciais de acesso padrão após a migração
+-- ─────────────────────────────────────────────────────────────
+-- Bibliotecário novo : biblioteca@acciotek.edu  | senha: password
+-- Admin original     : admin@biblioteca.edu     | senha: password
+-- ─────────────────────────────────────────────────────────────
